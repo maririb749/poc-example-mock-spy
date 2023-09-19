@@ -46,11 +46,11 @@ public class ProductService {
 		entity.setPrice(dto.getPrice());
 	}
 
-	protected void validateData(ProductDTO dto) {
+	public void validateData(ProductDTO dto) {
 		if (dto.getName().isBlank()) {
 			throw new InvalidDataException("Campo nome é vazio ou nulo");
 		}
-		if (dto.getPrice() == null || dto.getPrice() <= 0) {
+		if (dto.getPrice() == null || dto.getPrice() < 0) {
 			throw new InvalidDataException("Campo preco inválido");
 		}
 		return;
