@@ -15,6 +15,8 @@ import com.devsuperior.examplemockspy.dto.ProductDTO;
 import com.devsuperior.examplemockspy.entities.Product;
 import com.devsuperior.examplemockspy.repositories.ProductRepository;
 import com.devsuperior.examplemockspy.services.ProductService;
+import com.devsuperior.examplemockspy.services.exceptions.InvalidDataException;
+import com.devsuperior.examplemockspy.services.exceptions.ResourceNotFoundException;
 
 import jakarta.persistence.EntityNotFoundException;
 
@@ -48,16 +50,105 @@ public class ProductServiceTests {
 
 	@Test
 	public void insertShouldReturnProductDTOwhenValidateDate() {
-		// primeiro cenário:dados do produto ok.
-		
+		/*
+		 * primeiro cenário:dados do produto ok. vamos usar o Mokito.spy porque
+		 * precisamos mokar o método ValidateData
+		 */
+
 		ProductService serviceSpy = Mockito.spy(service);
 		Mockito.doNothing().when(serviceSpy).validateData(productDTO);
-		
+
 		ProductDTO result = serviceSpy.insert(productDTO);
-		
+
 		Assertions.assertNotNull(result);
 		Assertions.assertEquals(result.getName(), "Playstation");
 
 	}
 
+	@Test
+	public void insertShouldReturnInvalidDataExceptionWhenProductNameIsBlanK() {
+		productDTO.setName(" ");
+
+		ProductService serviceSpy = Mockito.spy(service);
+
+		Mockito.doThrow(InvalidDataException.class).when(serviceSpy).validateData(productDTO);
+		Assertions.assertThrows(InvalidDataException.class, () -> {
+			ProductDTO result = serviceSpy.insert(productDTO);
+		});
+
+	}
+
+	@Test
+	public void insertShouldReturnInvalidDataExceptionWhenProductPriceIsNegativeOrZero() {
+		productDTO.setPrice(-5.0);
+
+		ProductService serviceSpy = Mockito.spy(service);
+
+		Mockito.doThrow(InvalidDataException.class).when(serviceSpy).validateData(productDTO);
+		Assertions.assertThrows(InvalidDataException.class, () -> {
+			ProductDTO result = serviceSpy.insert(productDTO);
+		});
+
+	}
+
+	@Test
+	public void updateShouldReturnProductDTOWhenIdExistsAndValidData() {
+
+		ProductService serviceSpy = Mockito.spy(service);
+		Mockito.doNothing().when(serviceSpy).validateData(productDTO);
+
+		ProductDTO result = serviceSpy.update(existingId, productDTO);
+
+		Assertions.assertNotNull(result);
+		Assertions.assertEquals(result.getId(), existingId);
+		
+
+	}
+
+	@Test
+	public void updateShouldReturnInvalidDataExceptionWhenIdExistsAndWhenProductPriceIsNegativeOrZero() {
+		productDTO.setPrice(-5.0);
+
+		ProductService serviceSpy = Mockito.spy(service);
+
+		Mockito.doThrow(InvalidDataException.class).when(serviceSpy).validateData(productDTO);
+		Assertions.assertThrows(InvalidDataException.class, () -> {
+			ProductDTO result = serviceSpy.update(existingId, productDTO);
+		});
+
+	}
+	// Id não existente
+
+	@Test
+	public void updateShouldReturnResourceNotFoundExceptionWhenIdDoesNotExistsAndValiData() {
+
+		ProductService serviceSpy = Mockito.spy(service);
+		Mockito.doNothing().when(serviceSpy).validateData(productDTO);
+		Assertions.assertThrows(ResourceNotFoundException.class, () -> {
+			ProductDTO result = serviceSpy.update(nonExistingId, productDTO);
+		});
+	}
+
+	@Test
+	public void updateShouldReturnInvalidDataExceptionWhenIdDoesnNotExistAndProductNameIsBlank() {
+		productDTO.setName(" ");
+
+		ProductService serviceSpy = Mockito.spy(service);
+        Mockito.doThrow(InvalidDataException.class).when(serviceSpy).validateData(productDTO);
+        
+		Assertions.assertThrows(InvalidDataException.class, () -> {
+			ProductDTO result = serviceSpy.update(existingId, productDTO);
+		});
+	}
+	@Test
+	public void updateShouldReturnInvalidDataExceptionWhenIdDoesnNotExistAndProductPriceIsNegativeOrZero() {
+		productDTO.setPrice(-5.0);
+
+		ProductService serviceSpy = Mockito.spy(service);
+        Mockito.doThrow(InvalidDataException.class).when(serviceSpy).validateData(productDTO);
+        
+		Assertions.assertThrows(InvalidDataException.class, () -> {
+			ProductDTO result = serviceSpy.update(nonExistingId, productDTO);
+		});
+	}
 }

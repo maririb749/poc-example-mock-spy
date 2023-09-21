@@ -50,7 +50,7 @@ public class ProductService {
 		if (dto.getName().isBlank()) {
 			throw new InvalidDataException("Campo nome é vazio ou nulo");
 		}
-		if (dto.getPrice() == null || dto.getPrice() < 0) {
+		if (dto.getPrice() == null || dto.getPrice() <= 0) {
 			throw new InvalidDataException("Campo preco inválido");
 		}
 		return;
